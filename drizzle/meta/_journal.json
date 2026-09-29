@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790669384563,
+      "tag": "0000_true_chimera",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790700000000,
+      "tag": "0001_seed_bot_and_reauth",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790675070578,
+      "tag": "0002_dazzling_johnny_storm",
+      "breakpoints": true
+    }
+  ]
+}

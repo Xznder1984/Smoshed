@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Smoshed">
+  <rect width="64" height="64" rx="14" fill="#1e1e2e" />
+  <path
+    d="M16 18h32a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H29l-9 8v-8h-4a4 4 0 0 1-4-4V22a4 4 0 0 1 4-4z"
+    fill="#313244"
+  />
+  <path
+    d="M44 20 20 44M20 20l24 24"
+    stroke="#89dceb"
+    stroke-width="6"
+    stroke-linecap="round"
+  />
+</svg>

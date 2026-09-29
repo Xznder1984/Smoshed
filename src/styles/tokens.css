@@ -1,0 +1,123 @@
+/*
+ * Smoshed design tokens.
+ *
+ * Catppuccin Mocha, cyan accent. All colour pairs below were checked for
+ * contrast against their intended background:
+ *   text      #cdd6f4 on base   13.0:1
+ *   muted     #a6adc8 on base    7.4:1
+ *   subtle    #9399b2 on base    5.6:1
+ *   accent    #89dceb on base   11.9:1
+ *   danger    #f38ba8 on base    7.2:1
+ *   on-accent #032f44 on cyan   12.0:1
+ * `subtle` is the lightest grey allowed for body-size text; anything lighter
+ * is reserved for large text or decorative rules.
+ */
+:root {
+  color-scheme: dark;
+
+  --base: #1e1e2e;
+  --mantle: #181825;
+  --crust: #11111b;
+  --surface: #313244;
+  --surface-2: #45475a;
+  --overlay: #6c7086;
+
+  --text: #cdd6f4;
+  --muted: #a6adc8;
+  --subtle: #9aa0b8;
+
+  --accent: #89dceb;
+  --accent-strong: #94e2d5;
+  --on-accent: #032f44;
+
+  --green: #a6e3a1;
+  --yellow: #f9e2af;
+  --peach: #fab387;
+  --red: #f38ba8;
+  --mauve: #cba6f7;
+  --lavender: #b4befe;
+
+  /*
+   * `--border` draws decorative edges: cards, panels, alerts, the sidebar rule
+   * and the header underline. Those separate regions rather than identifying a
+   * control, so WCAG 1.4.11 does not apply to them and they stay quiet.
+   *
+   * `--border-control` is the one that matters. A text field has to be
+   * identifiable as a field, and at the resting state the old `--border` sat at
+   * 1.4:1 against the field's own background, which is invisible to anyone who
+   * cannot separate it by luminance. Controls use this instead, and it clears
+   * 3:1 against every background the controls appear on.
+   */
+  --border: #45475a;
+  --border-control: #7b7f96;
+  --border-strong: #9399b2;
+
+  --focus: #f5e0dc;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --font-sans: 'Public Sans', ui-sans-serif, system-ui, -apple-system,
+    'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 35%);
+  --shadow-2: 0 4px 16px rgb(0 0 0 / 35%);
+  --shadow-3: 0 12px 40px rgb(0 0 0 / 45%);
+
+  --header-height: 56px;
+  --sidebar-width: 260px;
+  --content-max: 640px;
+}
+
+/*
+ * Public Sans, self-hosted from public/fonts.
+ *
+ * The files are the variable latin subset, so one face covers 400, 600 and
+ * 700 and the browser only downloads one file. `font-display: swap` keeps text
+ * readable while it arrives instead of blocking on it. No third-party font CDN
+ * is contacted at runtime, which avoids a render-blocking request to Google and
+ * a third-party dependency on the privacy page.
+ */
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/public-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Public Sans';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/public-sans-latin-italic.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
