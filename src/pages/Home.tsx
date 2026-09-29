@@ -136,7 +136,7 @@ function Suggestions() {
       </h2>
       <div className="user-list">
         {people.map((person) => (
-          <Link key={person.id} to={`/${person.handle}`} className="user-row">
+          <Link key={person.id} to={`/@${person.handle}`} className="user-row">
             <Avatar seed={person.avatarSeed} name={person.displayName} handle={person.handle} size="sm" />
             <span>
               <strong>{person.displayName}</strong> <span className="muted">@{person.handle}</span>

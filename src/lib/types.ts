@@ -66,7 +66,7 @@ export type UserProfile = {
   user: AuthorView
 }
 
-export type ProviderId = 'groq' | 'nvidia' | 'ollama'
+export type ProviderId = 'groq' | 'nvidia' | 'ollama' | 'keenable'
 
 export type BotSettings = {
   enabled: boolean

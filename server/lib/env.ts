@@ -26,6 +26,21 @@ export const env = {
   get ollamaApiKey(): string | undefined {
     return optional('OLLAMA_API_KEY')
   },
+  get keenableApiKey(): string | undefined {
+    return optional('KEENABLE_API_KEY')
+  },
+  get googleClientId(): string | undefined {
+    return optional('GOOGLE_CLIENT_ID')
+  },
+  get googleClientSecret(): string | undefined {
+    return optional('GOOGLE_CLIENT_SECRET')
+  },
+  get discordClientId(): string | undefined {
+    return optional('DISCORD_CLIENT_ID')
+  },
+  get discordClientSecret(): string | undefined {
+    return optional('DISCORD_CLIENT_SECRET')
+  },
   /**
    * The public address of this deployment. Used for password reset links, so
    * it should be the address a person actually visits.

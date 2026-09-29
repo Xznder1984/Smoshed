@@ -14,7 +14,8 @@ import { IconBlock, IconMute } from '../components/icons'
 type Tab = 'posts' | 'replies' | 'followers' | 'following'
 
 export function ProfilePage() {
-  const { handle } = useParams<{ handle: string }>()
+  const rawHandle = useParams<{ handle: string }>().handle ?? ''
+  const handle = rawHandle.replace(/^@/, '')
   const { user: viewerSession } = useAuth()
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('posts')
@@ -225,7 +226,7 @@ export function ProfilePage() {
         ) : (
           <div className="user-list">
             {people.items.map((person) => (
-              <Link key={person.id} to={`/${person.handle}`} className="user-row">
+              <Link key={person.id} to={`/@${person.handle}`} className="user-row">
                 <Avatar
                   seed={person.avatarSeed}
                   name={person.displayName}

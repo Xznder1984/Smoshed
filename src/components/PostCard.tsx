@@ -87,14 +87,14 @@ export function PostCard({
   return (
     <article className="panel" aria-label={`Post by ${post.author.displayName}`}>
       <div className="row" style={{ alignItems: 'flex-start' }}>
-        <Link to={`/${post.author.handle}`} tabIndex={-1} aria-hidden="true">
+        <Link to={`/@${post.author.handle}`} tabIndex={-1} aria-hidden="true">
           <Avatar seed={post.author.avatarSeed} name={post.author.displayName} handle={post.author.handle} />
         </Link>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="row-between">
             <div className="row" style={{ minWidth: 0 }}>
-              <Link to={`/${post.author.handle}`} style={{ fontWeight: 700, color: 'inherit' }}>
+              <Link to={`/@${post.author.handle}`} style={{ fontWeight: 700, color: 'inherit' }}>
                 {post.author.displayName}
               </Link>
               <span className="muted">@{post.author.handle}</span>

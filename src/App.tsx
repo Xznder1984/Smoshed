@@ -33,7 +33,7 @@ export function App() {
         <Route path="/legal/terms" element={<LegalPage section="terms" />} />
         <Route path="/legal/privacy" element={<LegalPage section="privacy" />} />
         <Route path="/post/:id" element={<PostPage />} />
-        <Route path="/:handle" element={<ProfilePage />} />
+        <Route path="/@:handle" element={<ProfilePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </AppShell>

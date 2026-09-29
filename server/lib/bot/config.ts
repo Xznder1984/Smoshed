@@ -31,13 +31,13 @@ Hard rules:
 
 Write only the reply text. Nothing before or after it.`
 
-export type ProviderId = 'groq' | 'nvidia' | 'ollama'
+export type ProviderId = 'groq' | 'nvidia' | 'ollama' | 'keenable'
 
 type Provider = {
   id: ProviderId
   label: string
   baseUrl: string
-  envKey: 'GROQ_API_KEY' | 'NVIDIA_API_KEY' | 'OLLAMA_API_KEY'
+  envKey: 'GROQ_API_KEY' | 'NVIDIA_API_KEY' | 'OLLAMA_API_KEY' | 'KEENABLE_API_KEY'
   defaultModel: string
 }
 
@@ -63,9 +63,16 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     envKey: 'OLLAMA_API_KEY',
     defaultModel: 'llama3.3',
   },
+  keenable: {
+    id: 'keenable',
+    label: 'Keenable',
+    baseUrl: 'https://api.keenable.ai/v1',
+    envKey: 'KEENABLE_API_KEY',
+    defaultModel: 'gpt-oss-20b',
+  },
 }
 
-export const DEFAULT_PROVIDER_ORDER: ProviderId[] = ['groq', 'nvidia', 'ollama']
+export const DEFAULT_PROVIDER_ORDER: ProviderId[] = ['groq', 'nvidia', 'ollama', 'keenable']
 
 export type BotConfig = {
   enabled: boolean
@@ -88,6 +95,7 @@ export const DEFAULT_BOT_CONFIG: BotConfig = {
     groq: PROVIDERS.groq.defaultModel,
     nvidia: PROVIDERS.nvidia.defaultModel,
     ollama: PROVIDERS.ollama.defaultModel,
+    keenable: PROVIDERS.keenable.defaultModel,
   },
   systemPrompt: DEFAULT_SYSTEM_PROMPT,
   temperature: 1,
@@ -119,6 +127,7 @@ export async function getBotConfig(): Promise<BotConfig> {
       groq: (row.models as Record<string, string>)?.groq ?? PROVIDERS.groq.defaultModel,
       nvidia: (row.models as Record<string, string>)?.nvidia ?? PROVIDERS.nvidia.defaultModel,
       ollama: (row.models as Record<string, string>)?.ollama ?? PROVIDERS.ollama.defaultModel,
+      keenable: (row.models as Record<string, string>)?.keenable ?? PROVIDERS.keenable.defaultModel,
     },
     systemPrompt: row.systemPrompt,
     temperature: row.temperature,
@@ -133,7 +142,10 @@ export async function getBotConfig(): Promise<BotConfig> {
 
 function sanitizeOrder(value: unknown): ProviderId[] {
   if (!Array.isArray(value)) return DEFAULT_PROVIDER_ORDER
-  const valid = value.filter((v): v is ProviderId => v === 'groq' || v === 'nvidia' || v === 'ollama')
+  const valid = value.filter(
+    (v): v is ProviderId =>
+      v === 'groq' || v === 'nvidia' || v === 'ollama' || v === 'keenable',
+  )
   // Keep the configured order, then append any provider that was left out so
   // a partial configuration still has a working fallback.
   return [...valid, ...DEFAULT_PROVIDER_ORDER.filter((p) => !valid.includes(p))]
@@ -141,11 +153,12 @@ function sanitizeOrder(value: unknown): ProviderId[] {
 
 export const botSettingsSchema = z.object({
   enabled: z.boolean(),
-  providerOrder: z.array(z.enum(['groq', 'nvidia', 'ollama'])).min(1).max(3),
+  providerOrder: z.array(z.enum(['groq', 'nvidia', 'ollama', 'keenable'])).min(1).max(4),
   models: z.object({
     groq: z.string().min(1).max(120),
     nvidia: z.string().min(1).max(120),
     ollama: z.string().min(1).max(120),
+    keenable: z.string().min(1).max(120),
   }),
   systemPrompt: z.string().trim().min(20).max(4000),
   temperature: z.number().int().min(0).max(2),

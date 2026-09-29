@@ -77,6 +77,19 @@ export function SignupPage() {
           </div>
         ) : null}
 
+        <div className="stack" style={{ marginTop: 'var(--space-4)' }}>
+          <a href="/api/auth/google" className="btn btn-outline btn-block">
+            Sign up with Google
+          </a>
+          <a href="/api/auth/discord" className="btn btn-outline btn-block">
+            Sign up with Discord
+          </a>
+        </div>
+
+        <div className="divider">
+          <span>or</span>
+        </div>
+
         <form className="stack" style={{ marginTop: 'var(--space-4)' }} onSubmit={submit}>
           <div className="field">
             <label htmlFor="signup-name">Display name</label>

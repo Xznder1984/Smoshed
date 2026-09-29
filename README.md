@@ -147,6 +147,11 @@ Never sent to a browser.
 | `GROQ_API_KEY` | Groq provider. Optional. |
 | `NVIDIA_API_KEY` | NVIDIA NIM provider. Optional. |
 | `OLLAMA_API_KEY` | Ollama Cloud provider. Optional. |
+| `KEENABLE_API_KEY` | Keenable provider. Optional. |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID. Optional. |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret. Optional. |
+| `DISCORD_CLIENT_ID` | Discord OAuth client ID. Optional. |
+| `DISCORD_CLIENT_SECRET` | Discord OAuth client secret. Optional. |
 | `RESEND_API_KEY` | Password reset delivery. Optional. |
 | `MAIL_FROM` | Verified sender for reset mail. Optional. |
 | `CRON_SECRET` | Bearer token for the scheduled routes above. |

@@ -95,7 +95,7 @@ export function ExplorePage() {
           </h2>
           <div className="user-list">
             {results.users.map((person) => (
-              <Link key={person.id} to={`/${person.handle}`} className="user-row">
+              <Link key={person.id} to={`/@${person.handle}`} className="user-row">
                 <Avatar
                   seed={person.avatarSeed}
                   name={person.displayName}

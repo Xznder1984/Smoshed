@@ -106,6 +106,36 @@ export const passwordResetTokens = pgTable(
   (t) => [index('prt_token_hash_idx').on(t.tokenHash), index('prt_user_id_idx').on(t.userId)],
 )
 
+/** OAuth account links. One row per (provider, providerId) pair. */
+export const oauthAccounts = pgTable(
+  'oauth_accounts',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    providerId: text('provider_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('oauth_provider_key').on(t.provider, t.providerId)],
+)
+
+/** Single-use email magic link tokens. Only a hash is stored. */
+export const magicLinkTokens = pgTable(
+  'magic_link_tokens',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('mlt_token_hash_idx').on(t.tokenHash), index('mlt_user_id_idx').on(t.userId)],
+)
+
 /** Posts, replies and quote posts share one table, like the original model. */
 export const posts = pgTable(
   'posts',

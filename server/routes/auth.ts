@@ -41,6 +41,7 @@ import {
 } from '../lib/rate-limit.js'
 import { authorCounts, toAuthorBase } from '../lib/views.js'
 import { env } from '../lib/env.js'
+import { authorizeUrl, exchangeCode, isOAuthConfigured, OAuthError } from '../lib/oauth.js'
 
 /**
  * The password field used to *confirm an identity*, as opposed to choosing a
@@ -79,6 +80,21 @@ const changePasswordSchema = z.object({
 
 function fieldsFrom(error: z.ZodError): FieldError[] {
   return error.issues.map((i) => ({ path: i.path.join('.'), message: i.message }))
+}
+
+async function uniqueHandle(db: ReturnType<typeof getDb>, base: string): Promise<string> {
+  const clean = base.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20)
+  if (!clean) return `user_${randomToken(4)}`
+  let handle = clean
+  let n = 1
+  while (true) {
+    const existing = (
+      await db.select({ id: schema.users.id }).from(schema.users).where(eq(schema.users.handle, handle)).limit(1)
+    )[0]
+    if (!existing) return handle
+    n += 1
+    handle = `${clean.slice(0, 18)}_${n}`
+  }
 }
 
 export function authRoutes() {
@@ -460,6 +476,161 @@ export function authRoutes() {
     await db.delete(schema.users).where(eq(schema.users.id, user.id))
     await destroySession(c)
     return c.json({ ok: true })
+  })
+
+  // --- OAuth: Google & Discord ---
+
+  for (const provider of ['google', 'discord'] as const) {
+    app.get(`/${provider}`, async (c) => {
+      if (!isOAuthConfigured(provider)) {
+        return fail(c, 503, `${provider} sign-in is not configured.`)
+      }
+      const state = randomToken(32)
+      c.header('Set-Cookie', `oauth_state=${state}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`)
+      return c.redirect(authorizeUrl(provider, state))
+    })
+
+    app.get(`/${provider}/callback`, async (c) => {
+      const state = c.req.query('state')
+      const cookieState = c.req.header('cookie')?.match(/oauth_state=([^;]+)/)?.[1]
+      if (!state || !cookieState || state !== cookieState) {
+        return fail(c, 400, 'Invalid OAuth state.')
+      }
+      const code = c.req.query('code')
+      if (!code) return fail(c, 400, 'Missing authorization code.')
+
+      let profile
+      try {
+        profile = await exchangeCode(provider, code)
+      } catch (err) {
+        if (err instanceof OAuthError) return fail(c, 400, err.message)
+        return fail(c, 500, 'OAuth sign-in failed.')
+      }
+
+      const db = getDb()
+      const email = profile.email.toLowerCase()
+
+      // Find existing user by email or by OAuth identity
+      let user = (
+        await db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1)
+      )[0]
+
+      if (!user) {
+        // Check if this OAuth identity already has an account under a different email
+        const existingOAuth = (
+          await db
+            .select({ userId: schema.oauthAccounts.userId })
+            .from(schema.oauthAccounts)
+            .where(
+              and(
+                eq(schema.oauthAccounts.provider, provider),
+                eq(schema.oauthAccounts.providerId, profile.providerId),
+              ),
+            )
+            .limit(1)
+        )[0]
+        if (existingOAuth) {
+          user = (
+            await db.select().from(schema.users).where(eq(schema.users.id, existingOAuth.userId)).limit(1)
+          )[0]
+        }
+      }
+
+      if (!user) {
+        // Create new account
+        const handle = profile.displayName
+          .toLowerCase()
+          .replace(/[^a-z0-9_]/g, '')
+          .slice(0, 20) || `user_${randomToken(4)}`
+        const generatedHandle = await uniqueHandle(db, handle)
+        user = {
+          id: newId(),
+          email,
+          handle: generatedHandle,
+          displayName: profile.displayName.slice(0, 50),
+          bio: '',
+          avatarSeed: randomToken(8),
+          passwordHash: '',
+          isBot: false,
+          isAdmin: false,
+          emailVerifiedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }
+        await db.insert(schema.users).values(user)
+      }
+
+      // Link OAuth identity if not already linked
+      await db
+        .insert(schema.oauthAccounts)
+        .values({ id: newId(), userId: user.id, provider, providerId: profile.providerId })
+        .onConflictDoNothing()
+
+      await createSession(c, user.id, { userAgent: c.req.header('user-agent') ?? '' })
+      c.header('Set-Cookie', 'oauth_state=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0')
+      return c.redirect('/')
+    })
+  }
+
+  // --- Email magic link ---
+
+  app.post('/magic-link', async (c) => {
+    assertSameOrigin(c)
+    await enforce(c, 'magicLink', `ip:${clientIp(c)}`)
+    const parsed = z.object({ email: emailSchema }).safeParse(await readJson(c))
+    if (!parsed.success) {
+      return fail(c, 422, 'Enter a valid email address.')
+    }
+    if (!canDeliverMail()) {
+      return fail(c, 503, 'Email sign-in is not configured.')
+    }
+
+    const db = getDb()
+    const email = parsed.data.email.toLowerCase()
+    const user = (await db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1))[0]
+
+    if (user) {
+      const token = randomToken(32)
+      await db.insert(schema.magicLinkTokens).values({
+        id: newId(),
+        userId: user.id,
+        tokenHash: keyedTokenHash(token, env.sessionSecret),
+        expiresAt: new Date(Date.now() + 15 * 60_000),
+      })
+      await deliver({
+        to: user.email,
+        subject: 'Your Smoshed sign-in link',
+        text: [
+          'Open this link to sign in to Smoshed:',
+          `${env.appUrl}/api/auth/magic-link/verify?token=${encodeURIComponent(token)}`,
+          '',
+          'This link expires in 15 minutes.',
+        ].join('\n'),
+      })
+    }
+
+    return c.json({ ok: true })
+  })
+
+  app.get('/magic-link/verify', async (c) => {
+    const token = c.req.query('token')
+    if (!token) return fail(c, 400, 'Missing token.')
+
+    const db = getDb()
+    const tokenHash = keyedTokenHash(token, env.sessionSecret)
+    const rows = await db
+      .select()
+      .from(schema.magicLinkTokens)
+      .where(eq(schema.magicLinkTokens.tokenHash, tokenHash))
+      .limit(1)
+    const record = rows[0]
+    if (!record || record.expiresAt.getTime() < Date.now()) {
+      return fail(c, 400, 'That link has expired. Request a new one.')
+    }
+
+    await db.delete(schema.magicLinkTokens).where(eq(schema.magicLinkTokens.id, record.id))
+    await createSession(c, record.userId, { userAgent: c.req.header('user-agent') ?? '' })
+    return c.redirect('/')
   })
 
   return app

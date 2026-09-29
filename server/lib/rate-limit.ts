@@ -18,6 +18,7 @@ export const LIMITS = {
   search: { limit: 120, seconds: 3600 },
   bot: { limit: 12, seconds: 3600 },
   write: { limit: 300, seconds: 60 },
+  magicLink: { limit: 5, seconds: 3600 },
 } as const satisfies Record<string, Window>
 
 export type LimitName = keyof typeof LIMITS

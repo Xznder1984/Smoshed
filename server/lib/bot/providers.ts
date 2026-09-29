@@ -24,7 +24,8 @@ export class ProviderError extends Error {
 function apiKeyFor(provider: ProviderId): string | undefined {
   if (provider === 'groq') return env.groqApiKey
   if (provider === 'nvidia') return env.nvidiaApiKey
-  return env.ollamaApiKey
+  if (provider === 'ollama') return env.ollamaApiKey
+  return env.keenableApiKey
 }
 
 const TIMEOUT_MS = 20_000

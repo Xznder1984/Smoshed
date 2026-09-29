@@ -101,7 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="sidebar-footer">
           {user ? (
             <>
-              <NavLink to={`/${user.handle}`} className="nav-link">
+              <NavLink to={`/@${user.handle}`} className="nav-link">
                 <Avatar seed={user.avatarSeed} name={user.displayName} handle={user.handle} size="sm" />
                 <span>
                   {user.displayName}
@@ -142,7 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </NavLink>
         ))}
         {user ? (
-          <NavLink to={`/${user.handle}`} aria-label="Your profile">
+          <NavLink to={`/@${user.handle}`} aria-label="Your profile">
             <IconUser />
             <span>Profile</span>
           </NavLink>
