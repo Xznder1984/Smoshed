@@ -254,8 +254,10 @@ advisory is not reachable in production.
 3. Provider model IDs in `server/lib/bot/config.ts` still need checking against
    current Groq, NVIDIA NIM, and Ollama Cloud documentation.
 4. Should `@smosh` be an ordinary followable account, or unfollowable?
-5. The `DATABASE_URL` in use is the Neon owner role. Production needs a
-   least-privilege runtime role plus a separate migration credential.
+5. ~~The `DATABASE_URL` in use is the Neon owner role.~~ **Done.** Created
+   `smoshed_runtime` role with `SELECT, INSERT, UPDATE, DELETE` on all 17
+   tables, no DDL. `DATABASE_URL` in Vercel now points at the runtime role.
+   Local `.env.local` keeps the owner role for migrations.
 6. Should a scheduler call `/api/owner/bot/run` on a fixed interval, and if so
    how often? The rate limits in bot settings bound the damage, but nothing
    currently invokes the queue.

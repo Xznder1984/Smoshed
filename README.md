@@ -191,8 +191,6 @@ drizzle/              Generated migrations
 
 ## Known gaps
 
-- The app runs on the Neon owner role. Production wants a least-privilege
-  runtime role and a separate migration credential.
 - Password reset cannot deliver mail until a provider and sender are set.
 - Image uploads are not implemented; avatars are generated from a seed.
 - No browser-level accessibility or responsive audit has been run.
