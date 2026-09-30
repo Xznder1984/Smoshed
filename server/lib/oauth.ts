@@ -22,7 +22,7 @@ function redirectUri(provider: OAuthProvider): string {
 }
 
 export function authorizeUrl(provider: OAuthProvider, state: string): string {
-  const redirect = encodeURIComponent(redirectUri(provider))
+  const redirect = redirectUri(provider)
 
   if (provider === 'google') {
     const clientId = process.env.GOOGLE_CLIENT_ID

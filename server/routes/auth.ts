@@ -628,6 +628,7 @@ export function authRoutes() {
       return fail(c, 400, 'That link has expired. Request a new one.')
     }
 
+    // Consume the token before creating the session, so a replayed link fails.
     await db.delete(schema.magicLinkTokens).where(eq(schema.magicLinkTokens.id, record.id))
     await createSession(c, record.userId, { userAgent: c.req.header('user-agent') ?? '' })
     return c.redirect('/')
